@@ -40,6 +40,11 @@ find ./ -name '*.so' -execdir ${TOOLCHAIN}/bin/llvm-strip {} \;
 
 tar cJf ../jre${TARGET_VERSION}-${TARGET_SHORT}-`date +%Y%m%d`-${JDK_DEBUG_LEVEL}.tar.xz .
 
+# Pojlib downloads JRE-<version>.zip and unzips it straight into runtimes/JRE-<version>
+if [[ "$BUILD_IOS" != "1" ]] && [[ "$TARGET_SHORT" == "arm64" ]]; then
+  zip -qr ../JRE-${TARGET_VERSION}.zip .
+fi
+
 cd ../jdkout
 tar cJf ../jdk${TARGET_VERSION}-${TARGET_SHORT}-`date +%Y%m%d`-${JDK_DEBUG_LEVEL}.tar.xz .
 

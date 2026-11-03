@@ -34,7 +34,17 @@ else
    export JLINK_STRIP_ARG="--strip-debug"
 fi
 
-/home/compiler/actions-runner/_work/_tool/Java_Temurin-Hotspot_jdk/23.0.2-7/x64/bin/jlink \
+# jlink must match the target's java.base version. Cross builds of 25 also produce
+# a host "buildjdk" of the same version, so use that one.
+if [[ $TARGET_VERSION -ge 25 ]]; then
+   JLINK=openjdk/build/${JVM_PLATFORM}-${TARGET_JDK}-${JVM_VARIANTS}-${JDK_DEBUG_LEVEL}/buildjdk/jdk/bin/jlink
+   # No buildjdk is made when the boot JDK already is the target version
+   [[ -x "$JLINK" ]] || JLINK=$BOOT_JDK/bin/jlink
+else
+   JLINK=/home/compiler/actions-runner/_work/_tool/Java_Temurin-Hotspot_jdk/23.0.2-7/x64/bin/jlink
+fi
+
+$JLINK \
 --module-path=jdkout/jmods \
 --add-modules java.base,java.compiler,java.datatransfer,java.desktop,java.instrument,java.logging,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.se,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,java.xml.crypto,jdk.accessibility,jdk.charsets,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.dynalink,jdk.httpserver,jdk.jdwp.agent,jdk.jfr,jdk.jsobject,jdk.localedata,jdk.management,jdk.management.agent,jdk.management.jfr,jdk.naming.dns,jdk.naming.rmi,jdk.net,jdk.nio.mapmode,jdk.sctp,jdk.security.auth,jdk.security.jgss,jdk.unsupported,jdk.xml.dom,jdk.zipfs$EXTRA_JLINK_OPTION \
 --output jreout \

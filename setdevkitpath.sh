@@ -1,10 +1,15 @@
 # Description: Set the environment variables for the build scripts.
-export NDK_VERSION=r27b
+# JDK 25 needs NDK r28 (the jdk25u patch set is tested against it)
+if [[ "$TARGET_VERSION" -ge 25 ]] || [[ -z "$TARGET_VERSION" ]]; then
+  export NDK_VERSION=r28
+else
+  export NDK_VERSION=r27b
+fi
 
-# Target version is either 17 or 21
+# Target version is 17, 24 or 25
 if [[ -z "$TARGET_VERSION" ]]
 then
-  export TARGET_VERSION=24
+  export TARGET_VERSION=25
 fi
 
 if [[ -z "$BUILD_FREETYPE_VERSION" ]]

@@ -37,7 +37,7 @@ if [[ "$BUILD_IOS" != "1" ]]; then
     --with-freetype-lib=$FREETYPE_DIR/lib \
     "
 
-  if [[ $TARGET_VERSION -eq 24 ]]; then
+  if [[ $TARGET_VERSION -ge 24 ]]; then
     platform_args+="--build=x86_64-unknown-linux-gnu \
     "
   fi
@@ -50,7 +50,12 @@ if [[ "$BUILD_IOS" != "1" ]]; then
 
   AUTOCONF_x11arg="--x-includes=$ANDROID_INCLUDE/X11"
 
-  export CFLAGS+=" -mllvm -polly -DANDROID -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
+  if [[ $TARGET_VERSION -ge 25 ]]; then
+    # NDK r28 clang: built without polly
+    export CFLAGS+=" -DANDROID -Wno-int-conversion -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
+  else
+    export CFLAGS+=" -mllvm -polly -DANDROID -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
+  fi
   export LDFLAGS+=" -L$PWD/dummy_libs -Wl,--undefined-version"
 
 # Create dummy libraries so we won't have to remove them in OpenJDK makefiles
@@ -117,7 +122,7 @@ bash ./configure \
     --with-jvm-features=-dtrace,-zero,-vm-structs,-epsilongc \
     --with-cups-include=$CUPS_DIR \
     --with-devkit=$TOOLCHAIN \
-    --with-boot-jdk=/home/compiler/actions-runner/_work/_tool/Java_Temurin-Hotspot_jdk/23.0.2-7/x64 \
+    --with-boot-jdk=${BOOT_JDK:-/home/compiler/actions-runner/_work/_tool/Java_Temurin-Hotspot_jdk/23.0.2-7/x64} \
     --with-native-debug-symbols=external \
     --with-debug-level=$JDK_DEBUG_LEVEL \
     --with-fontconfig-include=$ANDROID_INCLUDE \
